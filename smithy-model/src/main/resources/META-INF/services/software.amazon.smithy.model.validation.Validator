@@ -40,6 +40,7 @@ software.amazon.smithy.model.validation.validators.SingleResourceBindingValidato
 software.amazon.smithy.model.validation.validators.StreamingTraitValidator
 software.amazon.smithy.model.validation.validators.TargetValidator
 software.amazon.smithy.model.validation.validators.TraitConflictValidator
+software.amazon.smithy.model.validation.validators.TraitDiffValidator
 software.amazon.smithy.model.validation.validators.TraitTargetValidator
 software.amazon.smithy.model.validation.validators.TraitValueValidator
 software.amazon.smithy.model.validation.validators.UnitTypeValidator

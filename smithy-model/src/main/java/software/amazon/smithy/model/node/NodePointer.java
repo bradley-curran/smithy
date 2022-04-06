@@ -33,12 +33,29 @@ public final class NodePointer {
 
     private static final Logger LOGGER = Logger.getLogger(NodePointer.class.getName());
 
-    private String originalString;
-    private List<String> parts;
+    private final String originalString;
+    private final List<String> parts;
 
     private NodePointer(String originalString, List<String> parts) {
         this.originalString = originalString;
         this.parts = parts;
+    }
+
+    /**
+     * Creates a NodePointer from a Node value.
+     *
+     * @param node Node value to parse.
+     * @return Returns the parsed NodePointer.
+     * @throws ExpectationNotMetException if the pointer cannot be parsed.
+     */
+    public static NodePointer fromNode(Node node) {
+        try {
+            String value = node.expectStringNode().getValue();
+            return NodePointer.parse(value);
+        } catch (RuntimeException e) {
+            String message = "Expected a string containing a valid JSON Path: " + e.getMessage();
+            throw new ExpectationNotMetException(message, node);
+        }
     }
 
     /**

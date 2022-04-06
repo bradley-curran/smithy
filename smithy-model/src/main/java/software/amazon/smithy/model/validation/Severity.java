@@ -17,11 +17,14 @@ package software.amazon.smithy.model.validation;
 
 import java.util.Arrays;
 import java.util.Optional;
+import software.amazon.smithy.model.node.ExpectationNotMetException;
+import software.amazon.smithy.model.node.Node;
+import software.amazon.smithy.model.node.ToNode;
 
 /**
  * Severity level of a validation exception.
  */
-public enum Severity {
+public enum Severity implements ToNode {
     SUPPRESSED,
     NOTE,
     WARNING,
@@ -46,5 +49,27 @@ public enum Severity {
      */
     public static Optional<Severity> fromString(String text) {
         return Arrays.stream(values()).filter(value -> value.toString().equals(text)).findFirst();
+    }
+
+    /**
+     * Creates a severity value from a node.
+     *
+     * @param node Node to parse.
+     * @return Returns the parsed Severity.
+     * @throws ExpectationNotMetException if the node is invalid.
+     */
+    public static Severity fromNode(Node node) {
+        try {
+            String value = node.expectStringNode().getValue();
+            return Severity.valueOf(value);
+        } catch (RuntimeException e) {
+            String message = "Expected a string containing a valid severity: " + e.getMessage();
+            throw new ExpectationNotMetException(message, node);
+        }
+    }
+
+    @Override
+    public Node toNode() {
+        return Node.from(toString());
     }
 }
