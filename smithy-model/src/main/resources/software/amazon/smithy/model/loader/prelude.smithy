@@ -578,8 +578,8 @@ string title
     selector: "string",
     breakingChanges: [
         {change: "presence"},
-        {path: "/*/value", change: "update"},
-        {path: "/*/name",  change: "update"}
+        {path: "/member/value", change: "update"},
+        {path: "/member/name",  change: "update"}
     ]
 )
 @length(min: 1)
