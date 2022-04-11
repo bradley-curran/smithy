@@ -19,6 +19,7 @@ package software.amazon.smithy.model.traits;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import java.util.HashMap;
@@ -47,6 +48,24 @@ public class PropertyTraitTest {
         assertTrue(propertyTrait.getName().isPresent());
         assertEquals("propertyName", propertyTrait.getName().get());
         
+        assertThat(propertyTrait.toNode(), equalTo(objectNode));
+        assertThat(propertyTrait.toBuilder().build(), equalTo(propertyTrait));
+    }
+
+    @Test
+    public void loadsNoName() {
+        TraitFactory provider = TraitFactory.createServiceFactory();
+        Map<StringNode, Node> values = new HashMap<>();
+        ObjectNode objectNode = Node.objectNode(values);
+        Optional<Trait> trait = provider.createTrait(ShapeId.from("smithy.api#property"),
+            ShapeId.from("ns.qux#foo"), objectNode);
+
+        assertTrue(trait.isPresent());
+        assertThat(trait.get(), instanceOf(PropertyTrait.class));
+        PropertyTrait propertyTrait = (PropertyTrait) trait.get();
+
+        assertFalse(propertyTrait.getName().isPresent());
+
         assertThat(propertyTrait.toNode(), equalTo(objectNode));
         assertThat(propertyTrait.toBuilder().build(), equalTo(propertyTrait));
     }
