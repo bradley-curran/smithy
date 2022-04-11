@@ -83,6 +83,13 @@ public final class ResourceOperationInputOutputValidator extends AbstractValidat
             validateTopLevelMembersToProperties(model, resource, operation, true, "list", events);
         });
 
+        Set<String> definedProperties = resource.getProperties().keySet();
+        definedProperties.retainAll(propertiesInOperations);
+        for (String propertyNotInLifecycleOp : definedProperties) {
+            events.add(error(resource, String.format("Resource shape's `%s` property which is not an input or output"
+                     + " for any lifecycle operation.", propertyNotInLifecycleOp)));
+        }
+
         return events;
     }
 
@@ -91,17 +98,20 @@ public final class ResourceOperationInputOutputValidator extends AbstractValidat
 
         operation.getInput().flatMap(model::getShape).flatMap(Shape::asStructureShape).ifPresent(structure -> {
             for (MemberShape member : structure.members()) {
-                properties.add(member.getTrait(PropertyTrait.class)
-                    .flatMap(trait -> trait.getName()).orElse(member.getMemberName()));
+                properties.add(getPropertyNameFromMember(member));
             }
         });
         operation.getOutput().flatMap(model::getShape).flatMap(Shape::asStructureShape).ifPresent(structure -> {
             for (MemberShape member : structure.members()) {
-                properties.add(member.getTrait(PropertyTrait.class)
-                    .flatMap(trait -> trait.getName()).orElse(member.getMemberName()));
+                properties.add(getPropertyNameFromMember(member));
             }
         });
         return properties;
+    }
+
+    private String getPropertyNameFromMember(MemberShape member) {
+        return member.getTrait(PropertyTrait.class)
+                    .flatMap(trait -> trait.getName()).orElse(member.getMemberName());
     }
 
     private void validateTopLevelMembersToProperties(
@@ -124,15 +134,13 @@ public final class ResourceOperationInputOutputValidator extends AbstractValidat
         topLevelShape.ifPresent(shape -> {
             for (MemberShape member : shape.members()) {
                 if (!member.hasTrait(TransientTrait.class)) {
-                    String propertyName = member.getTrait(PropertyTrait.class)
-                        .map(trait -> trait.getName().orElse(member.getMemberName()))
-                        .orElse(member.getMemberName());
+                    String propertyName = getPropertyNameFromMember(member);
                     propertyToMemberMappings.computeIfAbsent(propertyName,
                         m -> new TreeSet<>()).add(member);
 
                     if (properties.containsKey(propertyName)) {
                         if (!properties.get(propertyName).equals(member.getTarget())) {
-                            events.add(error(resource, String.format("The `%s` resource property has a conflicting"
+                            events.add(error(resource, String.format("The resource property `%s` has a conflicting"
                                 + " target shape `%s` with the `%s` lifecycle operation which targets `%s`.",
                                 propertyName, properties)));
                         }

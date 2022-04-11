@@ -17,6 +17,9 @@ package software.amazon.smithy.model.shapes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.model.SourceException;
@@ -34,5 +37,15 @@ public class ResourceShapeTest {
         Assertions.assertThrows(SourceException.class, () -> {
             ResourceShape.builder().id("ns.foo#Bar$baz").build();
         });
+    }
+
+    @Test
+    public void maintainsIdentifiers() {
+        Map<String, ShapeId> identifiers = new TreeMap<>();
+        identifiers.put("arn", ShapeId.from("ns.foo#ARN"));
+        ResourceShape shape = ResourceShape.builder().id("ns.foo#Bar")
+            .identifiers(identifiers)
+            .build();
+        assertEquals(shape.getIdentifiers(), identifiers);
     }
 }
