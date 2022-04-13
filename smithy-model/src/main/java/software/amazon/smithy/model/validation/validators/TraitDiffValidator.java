@@ -54,8 +54,7 @@ public final class TraitDiffValidator extends AbstractValidator {
                             .flatMap(member -> model.getShape(member.getTarget()))
                             .orElse(null);
                     if (current == null) {
-                        events.add(emit(shape, position, segment, String.format(
-                                "Invalid member '%s' or %s", segment, previous)));
+                        events.add(emit(shape, position, segment, previous));
                         break;
                     }
                     segment++;
@@ -66,11 +65,13 @@ public final class TraitDiffValidator extends AbstractValidator {
         }
     }
 
-    private ValidationEvent emit(Shape shape, int element, int segment, String message) {
+    private ValidationEvent emit(Shape shape, int element, int segment, Shape evaluated) {
         TraitDefinition definition = shape.expectTrait(TraitDefinition.class);
         NodePointer path = definition.getBreakingChanges().get(element).getPath().get();
         return error(shape, definition, String.format(
-                "Invalid breakingChanges element %d, '%s', at segment '%s': %s",
-                element, path, path.getParts().get(segment), message));
+                "Invalid breakingChanges element %d, '%s', at segment '%s': "
+                + "Evaluated shape `%s`, a %s, has no member named `%s`",
+                element, path, path.getParts().get(segment), evaluated.getId(), evaluated.getType(),
+                path.getParts().get(segment)));
     }
 }

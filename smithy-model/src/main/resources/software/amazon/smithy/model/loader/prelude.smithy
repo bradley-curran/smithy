@@ -77,7 +77,7 @@ structure trait {
     conflicts: NonEmptyStringList,
 
     /// Defines the backward compatibility rules of the trait.
-    diff: TraitDiffRules
+    breakingChanges: TraitDiffRules
 }
 
 @private
